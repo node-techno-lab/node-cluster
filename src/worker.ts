@@ -14,6 +14,8 @@ export class WorkerProcess {
 
     run(): void {
 
+        this.initialize();
+
         // Apply Log middelware
         this.app.all('*', (req, res, next) => {
             console.log(`${this.workerText} Request - ${req.method} => ${req.url}`);
@@ -55,5 +57,12 @@ export class WorkerProcess {
             };
             console.log(`${this.workerText} Web app is listening on port: ${this.port}`);
         });
+    }
+    private initialize() : void {
+        try {
+            throw new Error('Unexpected error occurs !');
+        } catch(errr) {
+            process.exit(99);
+        }
     }
 }

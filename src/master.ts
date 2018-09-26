@@ -33,7 +33,7 @@ export class MasterProcess {
     cluster.on('exit', (worker: Worker, code: any, signal: any) => {
       console.error(
         `${this.getMasterText(worker)} stopped working ` +
-        `after ${process.uptime()} sec (code:${code}, signal:${signal} exitedAfterDisconnect:${worker.exitedAfterDisconnect}).`);
+        `after ${process.uptime()} sec (code:${code}, signal:${signal}, exitedAfterDisconnect:${worker.exitedAfterDisconnect}).`);
 
       const idx = this._workers.indexOf(worker);
       if (idx != -1) {
@@ -41,11 +41,21 @@ export class MasterProcess {
       }
 
       if (code !== 0 && !worker.exitedAfterDisconnect) {
-        this.forkWorker();
+        if (code === 99) {
+          console.log(`${this.getMasterText(worker)} reports a fatal error and will not be restarted)`)
+        } else {
+          this.forkWorker();
+        }
       } else {
         console.log(`${this.getMasterText(worker)} has exit successfully`)
       }
+      
+      if( this._workers.length === 0) {
+        console.log(`all workers processes have reported fatal errors and cannot be restarted`);
+        process.exit(99);
+      }
       this.displayWorkerCache();
+
     });
   }
 
