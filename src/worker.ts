@@ -57,6 +57,7 @@ export class WorkerProcess {
             res.send(`${this.workerText} will crash asynchronously in ${timeout} ms\n`);
         });
 
+        // Crash in Promise rejection
         this.app.get('/crash/promise-reject', (req, res, next) => {
             console.log(`${this.workerText} crash with promise rejection...`);
             const strg = undefined;
@@ -65,6 +66,18 @@ export class WorkerProcess {
                 .catch((err) => res.send(`Promise rejection ${err} ${strg.length}\n`));
             res.send(`${this.workerText} will crashes in promise rejection\n`);
         });
+
+        // Stop the worker process
+        this.app.get('/stop', (req, res, next) => {
+            setTimeout(() => process.exit(0), 500);
+            res.send(`${this.workerText} will stop properly exit(0)...\n`);
+        });
+
+        // Exit teh worker process
+        this.app.get('/exit', (req, res, next) => {
+            setTimeout(() => process.exit(1), 500);
+            res.send(`${this.workerText} will exit(1)...\n`);
+        }); 
 
         // Error handler
         this.app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction): any => {

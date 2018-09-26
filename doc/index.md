@@ -11,4 +11,6 @@ For each error case, we will
  * [Crash in the root flow](crash-in-root-flow.md)
  * [Crash in the api root flow](crash-in-api-root-flow.md)
  * [Crash in async method](crash-in-async-method.md)
- * [Crash in promise rejection](crash-in-promise-rejection)
+ * [Crash in promise rejection](crash-in-promise-rejection.md)
+ * [Master kill/disconnect worker](master-kill-disconnect-worker.md)
+ * [Worker stop/exit by itself](worker-stop-exit-itself.md)
