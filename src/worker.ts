@@ -14,7 +14,7 @@ export class WorkerProcess {
 
     run(): void {
 
-        this.initialize();
+//        this.initialize();
 
         // Apply Log middelware
         this.app.all('*', (req, res, next) => {
@@ -38,6 +38,23 @@ export class WorkerProcess {
             res.writeHead(200);
             res.write(`${this.workerText} is reponding to the ping...\n`);
             res.end();
+        });
+
+        // Crash in the api root flow
+        this.app.get('/crash/root-flow', (req: express.Request, res: express.Response, next: express.NextFunction): any => {
+            const message = `crash in the root flow...`;
+            console.log(message);
+            throw new Error(message);
+            res.send(message); // Code is unreachable
+        });
+
+        // Error handler
+        this.app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction): any => {
+            if (err) {
+                console.error(` 500 - ${req.url}\n${err.message}`);
+                res.status(500);
+                res.send(`${this.workerText} Error ${err.message}\n`);
+            }
         });
 
         // Handle 404

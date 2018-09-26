@@ -1,8 +1,10 @@
 # Crash in the root flow
  
-this use case occurs when 
+This use case occurs when 
 * an error occurs before the `Express` web application is started listening on HTTP request (E.g. in the `server.initalize()`)
 * and you omit to handle the exception
+
+Update the `worker.ts`
 
 ```typescript
 export class WorkerProcess {
@@ -25,9 +27,9 @@ If you run this,
 * But the master should add some logic to avoid to refork the worker indefinitively. E.g. 10 times in a certain amount of time, report a critical error)
 * Or the worker should add a `try/cacth` block. And if the catched error is identified as fatal, it exit the process with a certain error code (E.g.99). The master process will treated as a fatal error and not restart the process
 
-Update the worker code 
+Update the `worker.ts` 
 
-```
+```typescript
 private initialize() : void {
     try {
         throw new Error('Unexpected error occurs !');
@@ -37,9 +39,9 @@ private initialize() : void {
 }       
 ```
 
-Update the master code
+Update the `master.ts`
 
-```
+```typescript
  run(): void {
     cluster.on('exit', (worker: Worker, code: any, signal: any) => {
         // ...

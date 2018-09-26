@@ -9,3 +9,4 @@ For each error case, we will
  * see if the master process is able to restart (refork) the server or not
 
  * [Crash in the root flow](crash-in-root-flow.md)
+ * [Crash in the api root flow](crash-in-api-root-flow.md)
