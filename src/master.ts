@@ -24,11 +24,23 @@ export class MasterProcess {
       this.displayWorkerCache();
     }
 
-    cluster.on('online', (worker) => {
-      console.log(`${this.getMasterText(worker)} is online...`);
-    });
+    interval(5000)
+      .pipe(take(1))
+      .subscribe(async (idx: number) => {
+        let worker = this._workers[0];
+        console.log(`Master kill worker ${worker.process.pid}...`);
+        this._workers[0].kill();
 
-    // code <number>   : The exit code, if it exited normally.
+        worker = this._workers[1];
+        console.log(`Master disconnect worker ${worker.process.pid}...`);
+        worker.disconnect();
+      });
+
+      cluster.on('online', (worker) => {
+        console.log(`${this.getMasterText(worker)} is online...`);
+      });
+
+      // code <number>   : The exit code, if it exited normally.
     // signal <string> : The name of the signal (e.g. 'SIGHUP') that caused the process to be killed.
     cluster.on('exit', (worker: Worker, code: any, signal: any) => {
       console.error(
@@ -49,8 +61,8 @@ export class MasterProcess {
       } else {
         console.log(`${this.getMasterText(worker)} has exit successfully`)
       }
-      
-      if( this._workers.length === 0) {
+
+      if (this._workers.length === 0) {
         console.log(`all workers processes have reported fatal errors and cannot be restarted`);
         process.exit(99);
       }
