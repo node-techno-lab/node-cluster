@@ -14,3 +14,4 @@ For each error case, we will
  * [Crash in promise rejection](crash-in-promise-rejection.md)
  * [Master kill/disconnect worker](master-kill-disconnect-worker.md)
  * [Worker stop/exit by itself](worker-stop-exit-itself.md)
+ * [Miscellanoeus](miscellaneous.md)
