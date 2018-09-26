@@ -19,7 +19,8 @@ export class WorkerProcess {
 }
 ```
 
-If you run this, 
+
+If you call the `/crash/root-flow` route by using `curl`
 
 * the worker process crashes
 * the master process detects it (`code:1, signal:null, exitedAfterDisconnect:false`) and forks a new worker process. 

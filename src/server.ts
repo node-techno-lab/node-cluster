@@ -31,9 +31,7 @@ export class Server {
   static onUnhandledRejection(reason, p) {
     console.error(`${process.pid} - Unhandled rejection occured\r\n` +
       `Promise: ${p}\r\n` +
-      `Reason:\r\n` +
-      `\t${reason.message}\r\n` +
-      `\t${reason.stack}`);
+      `Reason:${reason.message}\r\n${reason.stack}`);
   }
 
   static onUncaughtException(err) {

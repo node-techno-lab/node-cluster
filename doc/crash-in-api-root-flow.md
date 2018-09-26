@@ -5,7 +5,7 @@
 Update the `worker.ts`
 
 * uncomment the call to the `initizlize()` that each time throws a fatal error
-* add code under the `/crash/root-flow` that simulates the crash
+* add code under the `/crash/api-root-flow` that simulates the crash
 
 ```typescript
 export class WorkerProcess {
@@ -15,8 +15,8 @@ export class WorkerProcess {
 
         // ...
         // Crash in the api root flow
-        this.app.get('/crash/root-flow', (req: express.Request, res: express.Response, next: express.NextFunction): any => {
-            const message = `crash in the root flow...`;
+        this.app.get('/crash/api-root-flow', (req: express.Request, res: express.Response, next: express.NextFunction): any => {
+            const message = `crash in the api root flow...`;
             console.log(message);
             throw new Error(message);
             res.send(message); // Code is unreachable
@@ -26,7 +26,7 @@ export class WorkerProcess {
 }
 ```
 
-If you call the `/crash/root-flow` route by using `curl`
+If you call the `/crash/api-root-flow` route by using `curl`
 
 * the worker process `Express` response middleware crashes and throws a simple Exception
 * the code execution flow is aborted
@@ -34,10 +34,10 @@ If you call the `/crash/root-flow` route by using `curl`
 * `Express` returns the detailed HTML of the crash stack to the caller.
 
 ## Test the crash/root-flow route
-Call the `/crash/root-flow` route, by using `curl` 
+Call the `/crash/api-root-flow` route, by using `curl` 
 
 ```bash
-curl localhost:3030/crash/root-flow
+curl localhost:3030/crash/api-root-flow
 ````
 
 You should see the info on the console
@@ -56,9 +56,9 @@ You should see the info on the console
 </html>
 
 // Server logs
-Worker:26416 Request - GET => /crash/root-flow
+Worker:26416 Request - GET => /crash/api-root-flow
 crash in the root flow...
-Error: crash in the root flow...
+Error: crash in the api root flow...
     at app.get (/Users/id082816/Dev/github/node-techno-lab/node-cluster/dist/worker.js:35:19)
     at Layer.handle [as handle_request] (/Users/id082816/Dev/github/node-techno-lab/node-cluster/node_modules/express/lib/router/layer.js:95:5)
     at next (/Users/id082816/Dev/github/node-techno-lab/node-cluster/node_modules/express/lib/router/route.js:137:13)
@@ -82,8 +82,8 @@ run(): void {
 
     // ...
     
-    this.app.get('/crash/root-flow', (req: express.Request, res: express.Response, next: express.NextFunction): any => {
-        throw new Error(`crash in the root flow...`);
+    this.app.get('/crash/api-root-flow', (req: express.Request, res: express.Response, next: express.NextFunction): any => {
+        throw new Error(`crash in the api root flow...`);
     });
 
     // Error handler
@@ -104,7 +104,7 @@ run(): void {
 ```
 
 ## Test error handler middelware
-Call the `/crash/root-flow` route, by using `curl` 
+Call the `/crash/api-root-flow` route, by using `curl` 
 
 ```bash
 curl localhost:3030/crash/root-flow
@@ -114,11 +114,11 @@ You should see the info on the console
 
 ```text
 // Client logs
-Worker:32532 Error crash in the root flow...
+Worker:32532 Error crash in the api root flow...
 
 // Server logs
-Worker:32532 Request - GET => /crash/root-flow
-crash in the root flow...
- 500 - /crash/root-flow
-crash in the root flow...
+Worker:32532 Request - GET => /crash/api-root-flow
+crash in the api root flow...
+ 500 - /crash/api-root-flow
+crash in the api root flow...
 ```

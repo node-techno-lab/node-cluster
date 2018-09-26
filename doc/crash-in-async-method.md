@@ -59,12 +59,12 @@ Worker:37125 Web app is listening on port: 3030
 
 Because the `settimeout()` error is thrown from another execution stack, scheduled after the `Express` callback function terminates, we cannot just catch this error using the `try/catch` block.
 
-To catch all of these out of band errors, we need to globally register the `uncaughtException` handler where we can log the message, send it to a REST endpoint, ....
+To catch all of these out of band errors, we need to globally register the `uncaughtException` handler where we can log the error message, send the error to a REST endpoint, ....
 
 * the error thrown in the `setTiemout()` callback will be catched in the `uncaughtException` handler
 * the worker process will no crashes and not be restarted by the master
 
-Update the `server.ts` (because applicabled to master and worke processes)
+Update the `server.ts` (because applicabled to master and worker processes)
 
 ```typescript
 export class Server {

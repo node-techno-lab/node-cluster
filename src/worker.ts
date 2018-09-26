@@ -41,8 +41,8 @@ export class WorkerProcess {
         });
 
         // Crash in the api root flow
-        this.app.get('/crash/root-flow', (req: express.Request, res: express.Response, next: express.NextFunction): any => {
-            const message = `crash in the root flow...`;
+        this.app.get('/crash/api-root-flow', (req: express.Request, res: express.Response, next: express.NextFunction): any => {
+            const message = `crash in the api root flow...`;
             console.log(message);
             throw new Error(message);
             res.send(message); // Code is unreachable
@@ -55,6 +55,15 @@ export class WorkerProcess {
                 throw new Error(`crash asynchronously in setTimeout()`);
             }, timeout);
             res.send(`${this.workerText} will crash asynchronously in ${timeout} ms\n`);
+        });
+
+        this.app.get('/crash/promise-reject', (req, res, next) => {
+            console.log(`${this.workerText} crash with promise rejection...`);
+            const strg = undefined;
+            Promise.reject('NOK')
+                .then((value) => console.log('code not exeucted !'))
+                .catch((err) => res.send(`Promise rejection ${err} ${strg.length}\n`));
+            res.send(`${this.workerText} will crashes in promise rejection\n`);
         });
 
         // Error handler
