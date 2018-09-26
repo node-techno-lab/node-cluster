@@ -66,7 +66,7 @@ Update the `master.ts`
 
 This should generate the following output on the console
 
-````
+```text
 Running Cluster master 22031...
 Master forks a Cluster Worker
 Master cache contains now 1 cluster worker(s) [22032]
@@ -126,7 +126,7 @@ npm ERR! This is probably not a problem with npm. There is likely additional log
 
 npm ERR! A complete log of this run can be found in:
 npm ERR!     /Users/id082816/.npm/_logs/2018-09-26T13_47_46_794Z-debug.log
-````
+```
 
 
 

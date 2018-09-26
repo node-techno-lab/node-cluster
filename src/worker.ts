@@ -48,6 +48,15 @@ export class WorkerProcess {
             res.send(message); // Code is unreachable
         });
 
+        // Crash in an async function like settimeout
+        this.app.get('/crash/async', (rreq: express.Request, res: express.Response, next: express.NextFunction) => {
+            const timeout = 1000;
+            setTimeout(() => {
+                throw new Error(`crash asynchronously in setTimeout()`);
+            }, timeout);
+            res.send(`${this.workerText} will crash asynchronously in ${timeout} ms\n`);
+        });
+
         // Error handler
         this.app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction): any => {
             if (err) {
@@ -68,7 +77,7 @@ export class WorkerProcess {
         const server = require('http').createServer(this.app);
         server.listen(this.port, (err: any) => {
             if (err) {
-                const message = `ERROR ${err}`;
+                const message = `Listen error ${err}`;
                 console.error(message);
                 throw new Error(message);
             };

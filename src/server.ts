@@ -8,6 +8,8 @@ export class Server {
   }
 
   run(isClusterEnabled: boolean): void {
+    Server.registerProcessHooks();
+
     if (isClusterEnabled) {
       if (cluster.isMaster) {
         new MasterProcess().run();
@@ -18,5 +20,23 @@ export class Server {
     } else {
       new WorkerProcess(this.port, this.relativePublicPath).run();
     }
+  }
+
+  static registerProcessHooks() {
+    process.on('uncaughtException', Server.onUncaughtException);
+    process.on('unhandledRejection', Server.onUnhandledRejection);
+    process.on('exit', () => console.log(`${process.pid} exited after ${process.uptime()} sec`));
+  }
+  
+  static onUnhandledRejection(reason, p) {
+    console.error(`${process.pid} - Unhandled rejection occured\r\n` +
+      `Promise: ${p}\r\n` +
+      `Reason:\r\n` +
+      `\t${reason.message}\r\n` +
+      `\t${reason.stack}`);
+  }
+
+  static onUncaughtException(err) {
+     console.error(`${process.pid} - Unhandled exception ocurred\n${err.message}\r\n${err.stack}`);
   }
 }
