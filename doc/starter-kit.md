@@ -25,8 +25,6 @@ Basically the application is composed of 4 files :
 
 ![starter-kit](images/starter-kit.png)
 
-![starter-kit-files](images/starter-kit-files.png)
-
 > This code can be downloaded from the **starter-kit** branch
 
 ## Installation
