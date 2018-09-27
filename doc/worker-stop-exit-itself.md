@@ -1,13 +1,19 @@
 
 # Worker Stop/Exit by itself
 
-Update the `worker.ts`
+A worker can decide by itself to 
+
+* **stop** - by calling `process.exit(0)` with error code = 0. In that case the worker stops and the master does not refork the worker.
+
+* **exit** - by calling `process.exit(error-code <> 0)` with error code <> O. In that case, the worker stops and the master will refork a worker.
+
+## Update the Worker code
 
 * add code under the `/stop` that calls `process.exit(0)` after 500 ms (in `setTimeout()`callback)
 * add code under the `/exit` that calls `process.exit(1)` after 500 ms (in `setTimeout()`callback)
 
+Update the `worker.ts` file like this
 
-`
 ```typescript
 export class WorkerProcess {
     // ...
@@ -37,7 +43,7 @@ curl localhost:3030/crash/stop
 * the worker process stops and return the code=0 to the master
 * the master does not restart it
 
-If you call the `/exit` route by using `curl`
+This should produce the following output on the consoles
 
 ```text
 // Client logs
@@ -58,10 +64,7 @@ If you call the `/exit` route by using `curl`
 curl localhost:3030/crash/exit
 ```
 
-* the worker process exits with an error code (<> zero)
-* the master for a new worker
-
-If you call the `/exit` route by using `curl`
+This should produce the following output on the consoles
 
 ```text
 // Client logs

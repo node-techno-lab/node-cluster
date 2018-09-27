@@ -1,10 +1,17 @@
-# Crash in the GET api root flow
+# Crash in the api root flow
 
-##  Add the crash/root-flow route
+This use case occurs when the worker process `Express` response middleware crashes and throws a Exception
 
-Update the `worker.ts`
+What...
+* the code execution flow is aborted
+* the worker process continue to run and to serve next incoming HTTP requests
+* `Express` returns the detailed HTML of the crash stack to the caller.
 
-* uncomment the call to the `initizlize()` that each time throws a fatal error
+## Update worker code
+
+Update the `worker.ts` file like this
+
+* un-comment the call to the `initialize()` that each time throws a fatal error
 * add code under the `/crash/api-root-flow` that simulates the crash
 
 ```typescript
@@ -26,21 +33,15 @@ export class WorkerProcess {
 }
 ```
 
-If you call the `/crash/api-root-flow` route by using `curl`
+## Test crash
 
-* the worker process `Express` response middleware crashes and throws a simple Exception
-* the code execution flow is aborted
-* the worker process continue to run and to serve next incoming HTTP requests
-* `Express` returns the detailed HTML of the crash stack to the caller.
-
-## Test the crash/root-flow route
 Call the `/crash/api-root-flow` route, by using `curl` 
 
 ```bash
 curl localhost:3030/crash/api-root-flow
 ````
 
-You should see the info on the console
+This should produce the following output on the consoles
 
 ```text
 // Client logs
@@ -75,17 +76,11 @@ Error: crash in the api root flow...
 
 To avoid to present the full stack trace to the caller, we can add an extra `Express` error handler middelware that will return a status 500 (Internal Server Error) with the needed info (E.g. error message) 
 
-Update the `worker.ts`
+Update the `worker.ts` like this
 
 ```typescript
 run(): void {
-
     // ...
-    
-    this.app.get('/crash/api-root-flow', (req: express.Request, res: express.Response, next: express.NextFunction): any => {
-        throw new Error(`crash in the api root flow...`);
-    });
-
     // Error handler
     this.app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction): any => {
         if (err) {
@@ -103,14 +98,9 @@ run(): void {
 }
 ```
 
-## Test error handler middelware
-Call the `/crash/api-root-flow` route, by using `curl` 
+## Test error handler middleware
 
-```bash
-curl localhost:3030/crash/root-flow
-````
-
-You should see the info on the console
+If you compile, restart the application and execute the same curl command `curl localhost:3030/crash/api-root-flow`, it should produce the following output on the consoles
 
 ```text
 // Client logs

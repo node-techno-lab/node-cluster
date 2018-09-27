@@ -1,15 +1,18 @@
 # Master Kill/Disconnect workers
 
-In some cases, the lmaster process decide to stop workers intentionnaly (E.g. reduced load, ...). 
+In some cases, the master process can decide to stop worker(s) intentionally (E.g. reduced load, ...).  To do this the master can send the `kill` or `disconnect` to the concerned worker.
 
-To do this the master can send the `kill` or `disconnect`
+What...
+* The worker process is stopped 
+* the master does not refork the worker (see `exitedAfterDisconnect:true`)
 
+## Update the Worker code
 
-Update the `master.ts`
+Update the `master.ts` file like this
 
 * after 10 sec the master will take the first and second worker in the array of workers it maintains 
 * respectively `kill` and `disconnect` the worker
-* the worker process is stopped and not restarted by the master (see `exitedAfterDisconnect:true`
+* the worker process is stopped and not restarted by the master (see `exitedAfterDisconnect:true`)
 
 ```typescript
 export class MasterProcess {
@@ -31,8 +34,9 @@ export class MasterProcess {
 }
 ```
 
-If you recompile and restart t,eh application, you should see these ouput on the consoles
+## Test the Kill / Disconnect
 
+If you recompile and restart the application, it should produce the following output on the consoles
 
 ```text
 // Client logs
@@ -50,5 +54,3 @@ Worker-71599 stopped working after 5.529 sec (code:0, signal:null, exitedAfterDi
 Worker-71599 has exit successfully
 Master cache contains now 6 cluster worker(s) [71600, 71601, 71602, 71603, 71604, 71605]
 ```
-
-

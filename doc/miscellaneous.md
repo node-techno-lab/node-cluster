@@ -2,7 +2,7 @@
  
  ## PM2 ready event
  
-You can start PM2 with the `--wait-ready` options and `timeout
+You can start PM2 with the `--wait-ready` option
 
 ```bash
 pm2 start index.js --wait-ready --listen-timeout 15000
@@ -23,7 +23,7 @@ server.listen(this.port, (err: any) => {
 
 ## Closing the server properly
 
-The worker process should listen to the `SIGINT`event and close the server properly
+The worker process should listen to the `SIGINT` event and close the server properly
 
 ```typescript
 process.on('SIGINT', () =>{

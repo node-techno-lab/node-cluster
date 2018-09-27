@@ -2,14 +2,26 @@
 
 This use case occurs when an error is thrown in code executed out of the current call stack E.g. in a `setTimeout()` callback.
 
-Update the `worker.ts`
+What...
+* the `Express` response middleware associated with the `/crash/async` route is executed 
+* the client does not received any error message and the worker process flow ends up successfully 
+
+But
+* when the `setTimeout()` callback is executed, an error is thrown
+* that error does not crash the current execution stack, because of executed in its own little stack, scheduled via event loop
+* but that error completely crashes the worker process
+* the master process detects it (`code:1, signal:null, exitedAfterDisconnect:false`) and forks a new worker process. 
+
+## Update worker code
+
+Update the `worker.ts` like this
 
 ```typescript
 export class WorkerProcess {
     // ...
     run(): void {
         // ...
-       this.app.get('/crash/async', (rreq: express.Request, res: express.Response, next: express.NextFunction) => {
+       this.app.get('/crash/async', (req: express.Request, res: express.Response, next: express.NextFunction) => {
             const timeout = 1000;
             setTimeout(() => {
                 throw new Error(`crash asynchronously in setTimeout()`);
@@ -21,17 +33,15 @@ export class WorkerProcess {
 }
 ```
 
-If you run this, 
+## Test async crash
 
-* the `Express` handler associated with the `/crash/async` route is executed 
-* the client does not received any error message and the worker process flow ends up successfully 
+Call the `/crash/async` route, by using `curl` 
 
-* when the `setTimeout()` callback is executed, an error is thrown
-* but that error does not crash the current execution stack, because of executed in its own little stack, scheduled via event loop
-* but that error completely crashes the worker process
-* the master process detects it (`code:1, signal:null, exitedAfterDisconnect:false`) and forks a new worker process. 
+```bash
+curl localhost:3030/crash/async
+````
 
-This should generate the following output on the console
+This should produce the following output on the consoles
 
 ```text
 // Client logs
@@ -57,14 +67,17 @@ Worker:37125 Web app is listening on port: 3030
 
 ## Catching this Uncaught Exception
 
-Because the `settimeout()` error is thrown from another execution stack, scheduled after the `Express` callback function terminates, we cannot just catch this error using the `try/catch` block.
+Because the `setTimeout()` error is thrown from another execution stack, scheduled after the `Express` callback function terminates, we cannot just catch this error using the `try/catch` block.
 
 To catch all of these out of band errors, we need to globally register the `uncaughtException` handler where we can log the error message, send the error to a REST endpoint, ....
 
-* the error thrown in the `setTiemout()` callback will be catched in the `uncaughtException` handler
+What...
+* the error thrown in the `setTimeout()` callback will be catch in the `uncaughtException` handler
 * the worker process will no crashes and not be restarted by the master
 
-Update the `server.ts` (because applicabled to master and worker processes)
+## Update the Server code
+
+Update the `server.ts` file like this (because applicable to master and worker processes)
 
 ```typescript
 export class Server {
@@ -85,7 +98,9 @@ export class Server {
 }
 ```
 
-If you compile and restart the application, you should see the following output on the console
+## Test global Uncaught Exception handler
+
+If you compile, restart the application and execute the same curl command `curl localhost:3030/crash/async`, it should produce the following output on the consoles
 
 ```text
 // Client logs

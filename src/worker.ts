@@ -16,7 +16,7 @@ export class WorkerProcess {
 
 //        this.initialize();
 
-        // Apply Log middelware
+        // Apply Log middleware
         this.app.all('*', (req, res, next) => {
             console.log(`${this.workerText} Request - ${req.method} => ${req.url}`);
             next();
@@ -36,7 +36,7 @@ export class WorkerProcess {
         // GET /ping
         this.app.get('/ping', (req: express.Request, res: express.Response, next: express.NextFunction): any => {
             res.writeHead(200);
-            res.write(`${this.workerText} is reponding to the ping...\n`);
+            res.write(`${this.workerText} is responding to the ping...\n`);
             res.end();
         });
 
@@ -48,8 +48,8 @@ export class WorkerProcess {
             res.send(message); // Code is unreachable
         });
 
-        // Crash in an async function like settimeout
-        this.app.get('/crash/async', (rreq: express.Request, res: express.Response, next: express.NextFunction) => {
+        // Crash in an async function like setTimeout
+        this.app.get('/crash/async', (req: express.Request, res: express.Response, next: express.NextFunction) => {
             const timeout = 1000;
             setTimeout(() => {
                 throw new Error(`crash asynchronously in setTimeout()`);
@@ -62,7 +62,7 @@ export class WorkerProcess {
             console.log(`${this.workerText} crash with promise rejection...`);
             const strg = undefined;
             Promise.reject('NOK')
-                .then((value) => console.log('code not exeucted !'))
+                .then((value) => console.log('code not executed !'))
                 .catch((err) => res.send(`Promise rejection ${err} ${strg.length}\n`));
             res.send(`${this.workerText} will crashes in promise rejection\n`);
         });
@@ -109,7 +109,7 @@ export class WorkerProcess {
     private initialize() : void {
         try {
             throw new Error('Unexpected error occurs !');
-        } catch(errr) {
+        } catch(err) {
             process.exit(99);
         }
     }

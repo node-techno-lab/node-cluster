@@ -1,12 +1,27 @@
 # Crash in promise rejection
 
-To avoid callback hell, we frequently use `Promises` combined with the usage of the `async/await ` pattern. It is a best practice to use `.catch()` or use a `try/catch` block. 
+To avoid callback hell, we frequently use `Promises`. It is a best practice to use `.catch()` call back at the end of the `.then` chains. 
 
-But if an error is thrown in the catch block itself, the error goes nowhere !
+But if an error is thrown in the `catch` block itself, the error goes nowhere !
 
-Update the `worker.ts`
+What...
+* the `Express` response middleware handler is executed successfully 
+* the client does not received any error message
+* the client receives message sent by the server
 
-In the Promise `cacth` callback where we send the error HTTP response to the user, the  `undefined` `strg` is accessed that throw an error
+But
+* when the promise is rejected, an error is thrown in its `cacth` block
+* that error does not crash the current execution stack, because of executed in its own little stack, scheduled via event loop. 
+* that error goes nowhere 
+* the worker process does not crash and continue to serve next coming HTTP requests
+
+> Using the `async/await` does not react on the same way. Because in that cas we use a regular `try/catch block`. If an error os thrown in the catch block .... ToDO
+
+## Update the Worker code
+
+Update the `worker.ts` file like this
+
+In the Promise `.catch()` callback where we send the error HTTP response to the user, the  `undefined` `strg` is accessed that throws an error
 
 ```typescript
 export class WorkerProcess {
@@ -17,7 +32,7 @@ export class WorkerProcess {
             console.log(`${this.workerText} crash with promise rejection...`);
             const strg = undefined;
             Promise.reject('NOK')
-                .then((value) => console.log('code not exeucted !'))
+                .then((value) => console.log('code not executed !'))
                 .catch((err) => res.send(`Promise rejection ${err} ${strg.length}\n`));
             res.send(`${this.workerText} will crashes in promise rejection\n`);
         });
@@ -26,24 +41,22 @@ export class WorkerProcess {
 }
 ```
 
+## Test the crash
+
 If you call the `/crash/promise-reject` route by using `curl`
 
-* the `Express` handler associated with the `/crash/promise-reject` route is executed 
-* the client does not received any error message and the worker process flow ends up successfully 
+```bash
+curl localhost:3030/crash/promise-reject
+````
 
-* when the promise is rejected, an error is thrown in its `cacth` block
-* but that error does not crash the current execution stack, because of executed in its own little stack, scheduled via event loop. 
-* That error goes nowhere 
-* the worker process does not crash and continue to serve next coming HTTP requests
-
-This should generate the following output on the console
+This should produce the following output on the consoles
 
 ```text
 // Client logs
 Worker:57283 will crashes in promise rejection
 
 // Server logs
-orker:57897 Request - GET => /crash/promise-reject
+Worker:57897 Request - GET => /crash/promise-reject
 Worker:57897 crash with promise rejection...
 (node:57897) UnhandledPromiseRejectionWarning: TypeError: Cannot read property 'length' of undefined
     at Promise.reject.then.catch (/Users/id082816/Dev/github/node-techno-lab/node-cluster/dist/worker.js:50:75)
@@ -59,10 +72,12 @@ Worker:57897 crash with promise rejection...
 
 To catch all of these out of band errors, we need to globally register the `unhandledRejection` handler where we can log the error message, send the error to a REST endpoint, ....
 
-* the error thrown in the `setTiemout()` callback will be catched in the `uncaughtException` handler
+* the error thrown in the Promise `.catch()` callback will be catched in the `unhandledRejection` handler
 * the worker process will no crashes and not be restarted by the master
 
-Update the `server.ts` (because applicabled to master and worker processes)
+## Update the Server code
+
+Update the `server.ts` file like this (because applicable to master and worker processes)
 
 ```typescript
 export class Server {
@@ -88,11 +103,13 @@ export class Server {
 }
 ```
 
-If you compile and restart the application, you should see the following output on the console
+## Test global Unhandled Rejection handler
+
+If you compile, restart the application and execute the same curl command `curl localhost:3030/crash/promise-reject`, it should produce the following output on the consoles
 
 ```text
 // Client logs
-Worker:62381 will crashes in promise rejectio
+Worker:62381 will crashes in promise rejection
 
 // Server logs
 Worker:62381 Request - GET => /crash/promise-reject

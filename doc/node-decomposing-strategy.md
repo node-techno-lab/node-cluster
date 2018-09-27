@@ -1,0 +1,3 @@
+# Node.js decomposing strategy
+
+> Coming soon...

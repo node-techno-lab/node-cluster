@@ -2,26 +2,25 @@
 
 Basically the application is composed of 4 files : 
 
-* **index.ts** - entry point of the application.
+* **index.ts** - entry point of the application
     * It just creates the `Server` (from the `server.ts`).
-    * a boolean (`true`) can be passed as argument on the command line to enable the cluster mode. This can be used if you want to use the same code for test with `PM2`. The default (if not specified) is `true`.
+    * a boolean (`true`) can be passed as argument on the command line to enable the cluster mode. This can be used if you want to use the same code for testing node clustering with `PM2`. The default (if not specified) is `true`.
 
 * **server.js** - server implementation.
-    * Based on the `cluster.isMaster` result it creates a `MasterProcess` (from `master.ts`) or a `WorkerProcess` form (`worker.ts`))
+    * Based on the `cluster.isMaster` property value, it creates a `MasterProcess` (from `master.ts`) or a `WorkerProcess` from (`worker.ts`))
 
 * **master.ts** - implementation of the Node.js cluster master process.
     * It forks the worker processes (1 / CPU core)
-    * It maintans all the Worker references in cache
-    * It subscribes to the `online` event raised when a worker is online
-    * It subscrbes to the `exit` event raised when a worker crashes. It fork a new worker immediately.
+    * It maintains all the Worker references in cache
+    * It subscribes to the `online` event, raised when a worker is online
+    * It subscribes to the `exit` event, raised when a worker crashes. It react on this by forking a new worker.
 
 * **worker.ts** - implementation of the Node.js cluster worker process
-    * Starts the `Express` web application and listen for incomming HTTP resuest
-    * Provides a middelware to log on the console the HTTP incoming HTTP requestRequest
-    * Exposes a `/` to server web application from root folder (inclusing cors, body prser, ...)
+    * Starts the `Express` web application and listens for incoming HTTP requests
+    * Provides a middleware to log on the console the HTTP incoming HTTP request
+    * Exposes a `/` route to serve static files from a root folder. It uses also extra middlewares like `cors`, `body parser`, ...)
     * Handle the 404 (Not found)
-    * Provide a custom middelware that logs all teh HTTP requests
-    * Provide ping route (GET) that return some data 
+    * Provide a `/ping` route (GET) that returns some data 
 
 
 ![starter-kit](images/starter-kit.png)
@@ -34,6 +33,7 @@ Basically the application is composed of 4 files :
 
 ```bash
 git clone https://github.com/node-techno-lab/node-cluster.git
+git checkout starter-kit
 npm install
 ```
 
@@ -41,7 +41,7 @@ npm install
 
 ```bash
 npm run build       // compile the application
-npm run build:wtach // compile the application in watch mode
+npm run build:watch // compile the application in watch mode
 ```
 
 ## Start the application
@@ -50,7 +50,11 @@ npm run build:wtach // compile the application in watch mode
 
 ```bash
 npm run start       // start the application 
+```
 
+This should produce the following output on the console
+
+```text
 Cluster master 15732...
 Master forks a Cluster Worker
 Master cache contains now 1 cluster worker(s) [15733]
@@ -91,7 +95,11 @@ Call the `/ping` route, by using `curl`
 
 ```bash
 curl localhost:3030/ping
+```
 
+This should produce the following output on the consoles
+
+```text
 // Client logs
 Worker:15734 is responding
 
@@ -105,7 +113,11 @@ Get the list of running worker processes
 
 ```bash
 pgrep -lf node-cluster/dist/index.js
+```
 
+This should produce the following output on the console
+
+```bash
 15726 sh -c npm run build && node ./dist/index.js true
 15732 node ./dist/index.js true
 15733 /usr/local/bin/node /Users/id082816/Dev/github/node-techno-lab/node-cluster/dist/index.js true
@@ -118,11 +130,15 @@ pgrep -lf node-cluster/dist/index.js
 15740 /usr/local/bin/node /Users/id082816/Dev/github/node-techno-lab/node-cluster/dist/index.js true
 ```
 
-Kill a running worker process by usin its PID
+Kill a running worker process by using its PID
 
 ```bash
 killl  15740
+```
 
+This should produce the following output on the consoles
+
+```text
 // Server logs
 Worker-15740 stopped working after 1330.543 sec (code:null, signal:SIGTERM exitedAfterDisconnect:false).
 Master forks a Cluster Worker
@@ -133,11 +149,15 @@ Worker:16901 Web app is listening on port: 3030
 
 ## Call the / route
 
-Call the `/` route, by using `curl` or the browser
+Call the `/` route, by using `curl` or the browser. This will send the `public\index.html` to the client.
 
 ```bash
 curl localhost:3030/
+```
 
+This should produce the following output on the consoles
+
+```text
 // Client logs
 <!doctype html>
 

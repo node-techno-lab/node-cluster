@@ -1,10 +1,21 @@
 # Crash in the root flow
  
 This use case occurs when 
-* an error occurs before the `Express` web application is started listening on HTTP request (E.g. in the `server.initalize()`)
+
+* an error occurs before the `Express` web application is started listening for HTTP request (E.g. inside the `initialize()` method)
 * and you omit to handle the exception
 
-Update the `worker.ts`
+What...
+* the worker process crashes
+* the master process detects it (`code:1, signal:null, exitedAfterDisconnect:false`) and forks a new worker process (indefinitely)
+
+* But the master should add some logic to avoid to refork the worker indefinitely. E.g. 10 times in a certain amount of time, report a critical error)
+* Or the worker should add a `try/catch` block. And if the catch up error is identified as fatal, it exits the worker process with a certain error code (E.g.99) also handled by the master process as a fatal. In that case the master will not refork the worker process
+* When the master detect that there is no more worker alive, it must decide to exit itself with a fatal error code. If the maser in controlled by PM2, i will be restarted.
+
+## Update worker code
+
+Update the `worker.ts` file like this
 
 ```typescript
 export class WorkerProcess {
@@ -18,29 +29,9 @@ export class WorkerProcess {
     }
 }
 ```
+## Update master code
 
-
-If you call the `/crash/root-flow` route by using `curl`
-
-* the worker process crashes
-* the master process detects it (`code:1, signal:null, exitedAfterDisconnect:false`) and forks a new worker process. 
-
-* But the master should add some logic to avoid to refork the worker indefinitively. E.g. 10 times in a certain amount of time, report a critical error)
-* Or the worker should add a `try/cacth` block. And if the catched error is identified as fatal, it exit the process with a certain error code (E.g.99). The master process will treated as a fatal error and not restart the process
-
-Update the `worker.ts` 
-
-```typescript
-private initialize() : void {
-    try {
-        throw new Error('Unexpected error occurs !');
-    } catch(errr) {
-        process.exit(99);
-    }
-}       
-```
-
-Update the `master.ts`
+Update the `master.ts` file like this
 
 ```typescript
  run(): void {
@@ -57,7 +48,7 @@ Update the `master.ts`
       }
       
       if( this._workers.length === O) {
-        console.log(`all workers processes have reported fatal erros and cannot be restarted`);
+        console.log(`all workers processes have reported fatal errors and cannot be restarted`);
         process.exit(99);
       }
       this.displayWorkerCache();
@@ -65,9 +56,12 @@ Update the `master.ts`
   }
 ```
 
-This should generate the following output on the console
+## Test
+
+If you compile and start the application, it should produce the following output on the console
 
 ```text
+// Server logs
 Running Cluster master 22031...
 Master forks a Cluster Worker
 Master cache contains now 1 cluster worker(s) [22032]
@@ -128,6 +122,3 @@ npm ERR! This is probably not a problem with npm. There is likely additional log
 npm ERR! A complete log of this run can be found in:
 npm ERR!     /Users/id082816/.npm/_logs/2018-09-26T13_47_46_794Z-debug.log
 ```
-
-
-
