@@ -12,5 +12,5 @@ This document presents :
 * [Node Scaling Strategies](doc/node-scaling-strategies.md)
 * [Starter Kit](doc/starter-kit.md)
 * [Handle Crashes](doc/index.md)
-* [Node decomposing strategy](doc/node-decomposing.md)
+* [Node decomposing strategy](./doc/node-decomposing.md)
 
