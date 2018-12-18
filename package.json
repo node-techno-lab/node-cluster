@@ -2,7 +2,7 @@
   "name": "node-cluster",
   "version": "0.0.1",
   "description": "Node cluster test",
-  "author": "Proximus",
+  "author": "Barbeau",
   "license": "ISC",
   "main": "index.js",
   "scripts": {
